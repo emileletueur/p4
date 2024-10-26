@@ -34,7 +34,7 @@ export class P4 extends EventEmitter {
     this.Run();
   }
 
-  get isRedsTurn(): Boolean {
+  get isRedTurn(): Boolean {
     return this.stepNumber % 2 === 0;
   }
 
@@ -53,7 +53,7 @@ export class P4 extends EventEmitter {
     Prompt.eventEmitter.on("dropDisc", async () => {
       let tComputedRow =
         this.grid!.CountDiscsByColumn(this.currentSelectedColumn) + 1;
-      if (this.isRedsTurn && tComputedRow < 7)
+      if (this.isRedTurn && tComputedRow < 7)
         this.playerOne.DropDisc(this.currentSelectedColumn, tComputedRow);
       else this.playerTwo.DropDisc(this.currentSelectedColumn, tComputedRow);
       this.ClearDisplay();
@@ -104,7 +104,7 @@ export class P4 extends EventEmitter {
       .bold(`yellow's (${this.playerTwo._name})`);
     info(
       P4INFO(
-        `Round ${this.stepNumber}: It's ${this.isRedsTurn ? tRed : tYellow} turn. Make your move !`
+        `Round ${this.stepNumber}: It's ${this.isRedTurn ? tRed : tYellow} turn. Make your move !`
       )
     );
 

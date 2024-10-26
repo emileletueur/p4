@@ -74,7 +74,41 @@ export class Grid {
   }
 
   IsExistsWinningConbination(): boolean {
-    return true;
+    // 4 steps check 3x2
+    for (let tRow: number = 1; tRow <= this.rows; tRow += 2) {
+      for (let tColumn: number = 1; tColumn <= this.columns; tColumn += 3) {
+        let tAvailableRedDiscsForCombination = [
+          ...this.discs.redDiscs.filter((disc) => disc._position.column !== 0),
+        ];
+        let tAvailableYellowDiscsForCombination = [
+          ...this.discs.yellowDiscs.filter(
+            (disc) => disc._position.column !== 0
+          ),
+        ];
+        // horizontal combination
+        let tCurrentRowRedDiscs = [
+          ...tAvailableRedDiscsForCombination
+            .filter((disc) => disc._position.row === 1)
+            .sort((disc) => disc._position.column),
+        ];
+        if (tCurrentRowRedDiscs.length >= 4) {
+          if (
+            tCurrentRowRedDiscs.every(
+              (disc) =>
+                disc._position.column >= tColumn &&
+                disc._position.column <= tColumn + 3
+            )
+          )
+            return true;
+        }
+        // vertical combination
+
+        // slash combination
+
+        //back slash combination
+      }
+    }
+    return false;
   }
 
   Display(): void {

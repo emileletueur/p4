@@ -5,6 +5,11 @@ interface IDiscsSet {
   [key: string]: Disc[];
 }
 
+type FilterDelegate<T> = (item: T) => boolean;
+type SortDelegate<T> = (a: T, b: T) => number;
+
+type EveryDelegate<T> = (item: T, _: number, items: T[]) => boolean;
+
 const COLUMNS = 7;
 const ROWS = 6;
 const DISCS = 21;
@@ -74,34 +79,77 @@ export class Grid {
   }
 
   IsExistsWinningConbination(): boolean {
-    // 4 steps check 3x2
-    for (let tRow: number = 1; tRow <= this.rows; tRow += 2) {
-      for (let tColumn: number = 1; tColumn <= this.columns; tColumn += 3) {
-        let tAvailableRedDiscsForCombination = [
-          ...this.discs.redDiscs.filter((disc) => disc._position.column !== 0),
-        ];
-        let tAvailableYellowDiscsForCombination = [
-          ...this.discs.yellowDiscs.filter(
-            (disc) => disc._position.column !== 0
-          ),
-        ];
+    let tFilter: FilterDelegate<Disc>;
+    let tSort: SortDelegate<Disc>;
+    let tEvery: EveryDelegate<Disc>;
+
+    let tAvailableRedDiscsForCombination = [
+      ...this.discs.redDiscs.filter((disc) => disc._position.column !== 0),
+    ];
+    let tAvailableYellowDiscsForCombination = [
+      ...this.discs.yellowDiscs.filter((disc) => disc._position.column !== 0),
+    ];
+
+    for (let tRow: number = 1; tRow <= this.rows; tRow += 1) {
+      for (let tColumn: number = 1; tColumn <= this.columns; tColumn += 1) {
         // horizontal combination
-        let tCurrentRowRedDiscs = [
-          ...tAvailableRedDiscsForCombination
-            .filter((disc) => disc._position.row === 1)
-            .sort((disc) => disc._position.column),
-        ];
-        if (tCurrentRowRedDiscs.length >= 4) {
-          if (
-            tCurrentRowRedDiscs.every(
-              (disc) =>
-                disc._position.column >= tColumn &&
-                disc._position.column <= tColumn + 3
-            )
-          )
-            return true;
-        }
+        tFilter = (disc) => disc._position.row === tRow;
+        tSort = (disc) => disc._position.column;
+        tEvery = (disc, _, discs) => {
+          if (discs.length < 4) return false;
+          return (
+            disc._position.column >= tColumn &&
+            disc._position.column <= tColumn + 3
+          );
+        };
+        if (
+          this.FilterAndSort(
+            tAvailableRedDiscsForCombination,
+            tFilter,
+            tSort
+          ).every(tEvery)
+        )
+          return true;
+        if (
+          this.FilterAndSort(
+            tAvailableYellowDiscsForCombination,
+            tFilter,
+            tSort
+          ).every(tEvery)
+        )
+          return true;
         // vertical combination
+
+        tFilter = (disc) => disc._position.column === tColumn;
+        tSort = (disc) => disc._position.row;
+        if (
+          this.FilterAndSort(
+            tAvailableRedDiscsForCombination,
+            tFilter,
+            tSort
+          ).every((disc, _, discs) => {
+            if (discs.length < 4) return false;
+            return (
+              disc._position.column >= tColumn &&
+              disc._position.column <= tColumn + 3
+            );
+          })
+        )
+          return true;
+        if (
+          this.FilterAndSort(
+            tAvailableYellowDiscsForCombination,
+            tFilter,
+            tSort
+          ).every((disc, _, discs) => {
+            if (discs.length < 4) return false;
+            return (
+              disc._position.column >= tColumn &&
+              disc._position.column <= tColumn + 3
+            );
+          })
+        )
+          return true;
 
         // slash combination
 
@@ -109,6 +157,14 @@ export class Grid {
       }
     }
     return false;
+  }
+
+  FilterAndSort<T>(
+    discs: T[],
+    filterDelegate: FilterDelegate<T>,
+    sortDelegate: SortDelegate<T>
+  ): T[] {
+    return [...discs.filter(filterDelegate).sort(sortDelegate)];
   }
 
   Display(): void {
